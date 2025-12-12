@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Minimal Markdown to HTML converter entrypoint."""
 
+
 import os
 import sys
 
