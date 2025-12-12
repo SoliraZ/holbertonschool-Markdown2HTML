@@ -18,11 +18,8 @@ def main():
         print(f"Missing {md_file}", file=sys.stderr)
         sys.exit(1)
 
-    with open(md_file, "r", encoding="utf-8") as f_md:
-        content = f_md.read()
-
-    with open(output_file, "w", encoding="utf-8") as f_out:
-        f_out.write(content)
+    with open(output_file, "w"):
+        pass
 
     sys.exit(0)
 
