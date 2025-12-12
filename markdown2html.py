@@ -20,8 +20,23 @@ def main():
         print(f"Missing {md_file}", file=sys.stderr)
         sys.exit(1)
 
-    with open(output_file, "w"):
-        pass
+    with open(md_file, "r", encoding="utf-8") as f_md, open(
+        output_file, "w", encoding="utf-8"
+    ) as f_out:
+        for line in f_md:
+            stripped = line.rstrip("\n")
+
+            if stripped.startswith("#"):
+                hashes, _, text = stripped.partition(" ")
+                level = len(hashes)
+                if 1 <= level <= 6 and text:
+                    f_out.write(f"<h{level}>{text}</h{level}>\n")
+                    continue
+
+            if line.endswith("\n"):
+                f_out.write(stripped + "\n")
+            else:
+                f_out.write(stripped)
 
     sys.exit(0)
 
