@@ -25,6 +25,19 @@ def main():
     ) as f_out:
         in_list = False
         list_type = None  # 'ul' or 'ol'
+        paragraph_lines = []  # Collect lines for current paragraph
+
+        def output_paragraph():
+            """Output collected paragraph lines as HTML."""
+            nonlocal paragraph_lines
+            if paragraph_lines:
+                f_out.write("<p>\n")
+                f_out.write(paragraph_lines[0])
+                for para_line in paragraph_lines[1:]:
+                    f_out.write("<br/>\n")
+                    f_out.write(para_line)
+                f_out.write("</p>\n")
+                paragraph_lines = []
 
         for line in f_md:
             stripped = line.rstrip("\n")
@@ -34,6 +47,7 @@ def main():
                 hashes, _, text = stripped.partition(" ")
                 level = len(hashes)
                 if 1 <= level <= 6 and text:
+                    output_paragraph()
                     if in_list:
                         f_out.write(f"</{list_type}>\n")
                         in_list = False
@@ -43,6 +57,7 @@ def main():
 
             # Ordered list item
             if stripped.startswith("* "):
+                output_paragraph()
                 if not in_list:
                     f_out.write("<ol>\n")
                     in_list = True
@@ -53,6 +68,7 @@ def main():
 
             # Unordered list item
             if stripped.startswith("- "):
+                output_paragraph()
                 if not in_list:
                     f_out.write("<ul>\n")
                     in_list = True
@@ -67,13 +83,16 @@ def main():
                 in_list = False
                 list_type = None
 
-            # Non-heading, non-list lines are written unchanged.
-            if line.endswith("\n"):
-                f_out.write(stripped + "\n")
-            else:
-                f_out.write(stripped)
+            # Blank line: output paragraph if we have one
+            if not stripped:
+                output_paragraph()
+                continue
 
-        # Close list if file ended while inside a list.
+            # Regular text line: add to paragraph
+            paragraph_lines.append(stripped)
+
+        # Output any remaining paragraph and close list if needed
+        output_paragraph()
         if in_list:
             f_out.write(f"</{list_type}>\n")
 
