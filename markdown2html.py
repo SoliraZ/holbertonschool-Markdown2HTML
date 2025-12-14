@@ -4,6 +4,16 @@
 
 import os
 import sys
+import re
+
+
+def process_inline_formatting(text):
+    """Process inline markdown formatting: **bold** and __italic__."""
+    # Process bold: **text** -> <b>text</b>
+    text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
+    # Process italic: __text__ -> <em>text</em>
+    text = re.sub(r'__(.+?)__', r'<em>\1</em>', text)
+    return text
 
 
 def main():
@@ -32,10 +42,10 @@ def main():
             nonlocal paragraph_lines
             if paragraph_lines:
                 f_out.write("<p>\n")
-                f_out.write(paragraph_lines[0])
+                f_out.write(process_inline_formatting(paragraph_lines[0]))
                 for para_line in paragraph_lines[1:]:
                     f_out.write("<br/>\n")
-                    f_out.write(para_line)
+                    f_out.write(process_inline_formatting(para_line))
                 f_out.write("</p>\n")
                 paragraph_lines = []
 
@@ -52,7 +62,8 @@ def main():
                         f_out.write(f"</{list_type}>\n")
                         in_list = False
                         list_type = None
-                    f_out.write(f"<h{level}>{text}</h{level}>\n")
+                    formatted_text = process_inline_formatting(text)
+                    f_out.write(f"<h{level}>{formatted_text}</h{level}>\n")
                     continue
 
             # Ordered list item
@@ -63,7 +74,8 @@ def main():
                     in_list = True
                     list_type = "ol"
                 item_text = stripped[2:]
-                f_out.write(f"<li>{item_text}</li>\n")
+                formatted_text = process_inline_formatting(item_text)
+                f_out.write(f"<li>{formatted_text}</li>\n")
                 continue
 
             # Unordered list item
@@ -74,7 +86,8 @@ def main():
                     in_list = True
                     list_type = "ul"
                 item_text = stripped[2:]
-                f_out.write(f"<li>{item_text}</li>\n")
+                formatted_text = process_inline_formatting(item_text)
+                f_out.write(f"<li>{formatted_text}</li>\n")
                 continue
 
             # Close list if we were in one and reached a non-list line.
