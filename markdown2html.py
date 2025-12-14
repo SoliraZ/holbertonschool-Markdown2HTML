@@ -9,7 +9,8 @@ import hashlib
 
 
 def process_inline_formatting(text):
-    """Process inline markdown formatting: **bold**, __italic__, [[MD5]], ((remove c))."""
+    """Process inline markdown formatting:
+    **bold**, __italic__, [[MD5]], ((remove c))."""
     # Process MD5: [[text]] -> MD5 hash (lowercase)
     def md5_replace(match):
         content = match.group(1)
