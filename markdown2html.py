@@ -24,6 +24,7 @@ def main():
         output_file, "w", encoding="utf-8"
     ) as f_out:
         in_list = False
+        list_type = None  # 'ul' or 'ol'
 
         for line in f_md:
             stripped = line.rstrip("\n")
@@ -34,24 +35,37 @@ def main():
                 level = len(hashes)
                 if 1 <= level <= 6 and text:
                     if in_list:
-                        f_out.write("</ul>\n")
+                        f_out.write(f"</{list_type}>\n")
                         in_list = False
+                        list_type = None
                     f_out.write(f"<h{level}>{text}</h{level}>\n")
                     continue
+
+            # Ordered list item
+            if stripped.startswith("* "):
+                if not in_list:
+                    f_out.write("<ol>\n")
+                    in_list = True
+                    list_type = "ol"
+                item_text = stripped[2:]
+                f_out.write(f"<li>{item_text}</li>\n")
+                continue
 
             # Unordered list item
             if stripped.startswith("- "):
                 if not in_list:
                     f_out.write("<ul>\n")
                     in_list = True
+                    list_type = "ul"
                 item_text = stripped[2:]
                 f_out.write(f"<li>{item_text}</li>\n")
                 continue
 
             # Close list if we were in one and reached a non-list line.
             if in_list:
-                f_out.write("</ul>\n")
+                f_out.write(f"</{list_type}>\n")
                 in_list = False
+                list_type = None
 
             # Non-heading, non-list lines are written unchanged.
             if line.endswith("\n"):
@@ -61,7 +75,7 @@ def main():
 
         # Close list if file ended while inside a list.
         if in_list:
-            f_out.write("</ul>\n")
+            f_out.write(f"</{list_type}>\n")
 
     sys.exit(0)
 
