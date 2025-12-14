@@ -5,10 +5,26 @@
 import os
 import sys
 import re
+import hashlib
 
 
 def process_inline_formatting(text):
-    """Process inline markdown formatting: **bold** and __italic__."""
+    """Process inline markdown formatting: **bold**, __italic__, [[MD5]], ((remove c))."""
+    # Process MD5: [[text]] -> MD5 hash (lowercase)
+    def md5_replace(match):
+        content = match.group(1)
+        md5_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
+        return md5_hash
+
+    text = re.sub(r'\[\[(.+?)\]\]', md5_replace, text)
+
+    # Process remove c: ((text)) -> remove all 'c' and 'C' characters
+    def remove_c_replace(match):
+        content = match.group(1)
+        return content.translate(str.maketrans('', '', 'cC'))
+
+    text = re.sub(r'\(\((.+?)\)\)', remove_c_replace, text)
+
     # Process bold: **text** -> <b>text</b>
     text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
     # Process italic: __text__ -> <em>text</em>
